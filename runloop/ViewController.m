@@ -49,12 +49,16 @@
     [self performSelector:@selector(nameAction) onThread:thread withObject:nil waitUntilDone:NO];
 
 //    CFRunLoopStop(runloop.getCFRunLoop);
+    
+
 }
 
 
 - (void)nameAction{
     
     NSLog(@"执行位置 thread = %@",thread.name);
+//    [self registerSource];
+
 }
 
 - (void)makeAthread{
@@ -90,11 +94,29 @@
     
     
     NSLog(@"thread action 2");
+    
 
   
 }
 
+// 注册；source0 事件，runloop 如果活着就执行，反之需要唤醒执行
+// source0 只是简单的注册了事件，不能主动触发事件，source1 能够唤醒runloop
+- (void)registerSource{
+    
+    CFRunLoopSourceContext context = {0, (__bridge void *)self, NULL, NULL, NULL, NULL, NULL, NULL, NULL, perform};
+    
 
+    CFRunLoopSourceRef source0 = CFRunLoopSourceCreate(kCFAllocatorDefault, 0, &context);
+// 标记source0 唤醒后执行
+    CFRunLoopSourceSignal(source0);
+    CFRunLoopAddSource(runloop2, source0, kCFRunLoopDefaultMode);
+//    CFRunLoopWakeUp(runloop2);
+}
+
+void perform(void *info){
+    
+    NSLog(@"触发了事件");
+}
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
